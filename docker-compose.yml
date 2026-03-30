@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:11434/api/tags" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - ai-network
+
+  evaluator:
+    build: .
+    container_name: ai-evaluator
+    ports:
+      - "8501:8501"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ai-network
+    command: streamlit run evaluate.py --server.address=0.0.0.0
+
+volumes:
+  ollama-data:
+    driver: local
+
+networks:
+  ai-network:
+    driver: bridge
