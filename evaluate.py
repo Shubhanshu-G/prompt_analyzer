@@ -18,7 +18,8 @@ from utils.prompt_analyzer import (
     split_into_lines,
     detect_decision_points,
     calculate_hallucination_risk,
-    get_risk_level
+    get_risk_level,
+    analyze_line
 )
 from config import EVALUATORS, OLLAMA_DEFAULT_MODEL
 import re
